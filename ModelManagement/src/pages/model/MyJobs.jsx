@@ -1,7 +1,7 @@
 // src/pages/model/MyJobs.jsx
 import { useState, useEffect } from 'react';
 import { modelService } from '../../services/api';
-import { useAuth } from '../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 
 const MyJobs = () => {
     const [jobs, setJobs] = useState([]);

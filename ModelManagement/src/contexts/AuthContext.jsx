@@ -1,8 +1,9 @@
-import { createContext, useState, useEffect} from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { authService } from '../services/api';
 
-const AuthContext = createContext();
+// Export the context directly
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
