@@ -7,7 +7,7 @@ const JobList = ({ jobs, models, onAddModel, onRemoveModel }) => {
 
     const handleAddModel = () => {
         if (!selectedJob || !selectedModel) return;
-        onAddModel(selectedJob.id, selectedModel);
+        onAddModel(selectedJob.jobId, selectedModel);
         setSelectedModel('');
     };
 
@@ -19,7 +19,7 @@ const JobList = ({ jobs, models, onAddModel, onRemoveModel }) => {
             ) : (
                 <div className="jobs-grid">
                     {jobs.map((job) => (
-                        <div key={job.id} className="job-card">
+                        <div key={job.jobId} className="job-card">
                             <h3>{job.customer}</h3>
                             <p><strong>Start Date:</strong> {new Date(job.startDate).toLocaleDateString()}</p>
                             <p><strong>Days:</strong> {job.days}</p>
@@ -31,10 +31,10 @@ const JobList = ({ jobs, models, onAddModel, onRemoveModel }) => {
                                 {job.models && job.models.length > 0 ? (
                                     <ul>
                                         {job.models.map((model) => (
-                                            <li key={model.id}>
+                                            <li key={model.modelId}>
                                                 {model.firstName} {model.lastName}
                                                 <button
-                                                    onClick={() => onRemoveModel(job.id, model.id)}
+                                                    onClick={() => onRemoveModel(job.jobId, model.modelId)}
                                                     className="remove-model-btn"
                                                 >
                                                     Remove
@@ -73,7 +73,7 @@ const JobList = ({ jobs, models, onAddModel, onRemoveModel }) => {
                         >
                             <option value="">-- Select a Model --</option>
                             {models.map((model) => (
-                                <option key={model.id} value={model.id}>
+                                <option key={model.modelId} value={model.modelId}>
                                     {model.firstName} {model.lastName}
                                 </option>
                             ))}

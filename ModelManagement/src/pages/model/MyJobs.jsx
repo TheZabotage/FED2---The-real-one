@@ -1,5 +1,5 @@
 // src/pages/model/MyJobs.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { modelService } from '../../services/api';
 import useAuth from '../../hooks/useAuth';
 
@@ -10,24 +10,30 @@ const MyJobs = () => {
     const [selectedJobId, setSelectedJobId] = useState(null);
     const [expenseForm, setExpenseForm] = useState({
         amount: '',
-        description: ''
+        text: '', // Changed from 'description' to match backend schema
+        date: new Date().toISOString().split('T')[0] // Adding date field required by API
     });
     const { currentUser } = useAuth();
 
-    useEffect(() => {
-        fetchMyJobs();
-    }, []);
+    // Use useCallback to memoize the fetchMyJobs function
+    const fetchMyJobs = useCallback(async () => {
+        if (!currentUser || !currentUser.modelId) return;
 
-    const fetchMyJobs = async () => {
         try {
-            const response = await modelService.getMyJobs();
+            // Pass the model ID from the current user
+            const response = await modelService.getMyJobs(currentUser.modelId);
             setJobs(response.data);
             setLoading(false);
         } catch (err) {
             setError('Failed to load jobs: ' + (err.message || 'Unknown error'));
             setLoading(false);
         }
-    };
+    }, [currentUser]);
+
+    // Now include fetchMyJobs in the dependency array
+    useEffect(() => {
+        fetchMyJobs();
+    }, [fetchMyJobs]);
 
     const handleExpenseChange = (e) => {
         const { name, value } = e.target;
@@ -42,20 +48,23 @@ const MyJobs = () => {
         if (!selectedJobId) return;
 
         try {
-            // Format expense data
+            // Format expense data according to the API schema
             const expenseData = {
-                ...expenseForm,
-                amount: parseFloat(expenseForm.amount),
                 modelId: currentUser.modelId,
-                jobId: selectedJobId
+                jobId: selectedJobId,
+                date: expenseForm.date,
+                text: expenseForm.text,
+                amount: parseFloat(expenseForm.amount)
             };
 
-            await modelService.addExpense(selectedJobId, expenseData);
+            // Use the correct endpoint to add expense
+            await modelService.addExpense(expenseData);
 
             // Reset form and refresh jobs to show new expense
             setExpenseForm({
                 amount: '',
-                description: ''
+                text: '',
+                date: new Date().toISOString().split('T')[0]
             });
             setSelectedJobId(null);
 
@@ -79,7 +88,7 @@ const MyJobs = () => {
             ) : (
                 <div className="jobs-container">
                     {jobs.map(job => (
-                        <div key={job.id} className="job-card">
+                        <div key={job.jobId} className="job-card">
                             <h3>{job.customer}</h3>
                             <p><strong>Start Date:</strong> {new Date(job.startDate).toLocaleDateString()}</p>
                             <p><strong>Duration:</strong> {job.days} days</p>
@@ -91,10 +100,10 @@ const MyJobs = () => {
                                 {job.expenses && job.expenses.length > 0 ? (
                                     <ul className="expenses-list">
                                         {job.expenses.map(expense => (
-                                            <li key={expense.id} className="expense-item">
+                                            <li key={expense.expenseId} className="expense-item">
                                                 <span>${expense.amount.toFixed(2)}</span>
-                                                <span>{expense.description}</span>
-                                                <span>{new Date(expense.dateCreated).toLocaleDateString()}</span>
+                                                <span>{expense.text}</span>
+                                                <span>{new Date(expense.date).toLocaleDateString()}</span>
                                             </li>
                                         ))}
                                     </ul>
@@ -104,7 +113,7 @@ const MyJobs = () => {
                             </div>
 
                             <button
-                                onClick={() => setSelectedJobId(job.id)}
+                                onClick={() => setSelectedJobId(job.jobId)}
                                 className="add-expense-button"
                             >
                                 Add Expense
@@ -134,12 +143,24 @@ const MyJobs = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="description">Description</label>
+                            <label htmlFor="text">Description</label>
                             <input
                                 type="text"
-                                id="description"
-                                name="description"
-                                value={expenseForm.description}
+                                id="text"
+                                name="text"
+                                value={expenseForm.text}
+                                onChange={handleExpenseChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="date">Date</label>
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                value={expenseForm.date}
                                 onChange={handleExpenseChange}
                                 required
                             />

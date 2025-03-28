@@ -1,10 +1,9 @@
-// the API is forr communicating with the backend
-
+// src/services/api.jsx
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/api';
 
-//instance of axios
+// Create axios instance
 const api = axios.create({
     baseURL: API_URL,
     headers: {
@@ -12,7 +11,7 @@ const api = axios.create({
     },
 });
 
-// Handle JWT token for all requests, works as request interceptor, so all rrequests will have the token
+// Handle JWT token for all requests
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -24,39 +23,65 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-//Authentification service, login.
-//Try catch is reddundant as the error is handled in await
-
+// Authentication service
 export const authService = {
     login: async (email, password) => {
-        const response = await axios.post(`${API_URL}/account/login`, { email, password });
+        const response = await axios.post(`${API_URL}/Account/login`, { email, password });
         if (response.data.jwt) {
             localStorage.setItem('token', response.data.jwt);
             return response.data;
         }
+    },
+    changePassword: (email, oldPassword, newPassword) => {
+        return api.put('/Account/Password', { email, oldPassword, password: newPassword });
     },
     logout: () => {
         localStorage.removeItem('token');
     }
 };
 
-
-//Manager service; what can a manage do?
+// Manager service
 export const managerService = {
-    createModel: (modelData) => api.post('/models', modelData),
-    createManager: (managerData) => api.post('/account/managers', managerData),
-    createJob: (jobData) => api.post('/jobs', jobData),
-    addModelToJob: (jobId, modelId) => api.post(`/jobs/${jobId}/models/${modelId}`),
-    removeModelFromJob: (jobId, modelId) => api.delete(`/jobs/${jobId}/models/${modelId}`),
-    getAllJobs: () => api.get('/jobs'),
-    getModels: () => api.get('/models'),  // Add this method
-    getManagers: () => api.get('/account/managers')  // Add this method too
+    // Models management
+    getModels: () => api.get('/Models'),
+    getModel: (id) => api.get(`/Models/${id}`),
+    createModel: (modelData) => api.post('/Models', modelData),
+    updateModel: (id, modelData) => api.put(`/Models/${id}`, modelData),
+    deleteModel: (id) => api.delete(`/Models/${id}`),
+    getModelJobs: (id) => api.get(`/Models/${id}/jobs`),
+
+    // Managers management
+    getManagers: () => api.get('/Managers'),
+    getManager: (id) => api.get(`/Managers/${id}`),
+    createManager: (managerData) => api.post('/Managers', managerData),
+    updateManager: (id, managerData) => api.put(`/Managers/${id}`, managerData),
+    deleteManager: (id) => api.delete(`/Managers/${id}`),
+
+    // Jobs management
+    getAllJobs: () => api.get('/Jobs'),
+    getJob: (id) => api.get(`/Jobs/${id}`),
+    createJob: (jobData) => api.post('/Jobs', jobData),
+    updateJob: (id, jobData) => api.put(`/Jobs/${id}`, jobData),
+    deleteJob: (id) => api.delete(`/Jobs/${id}`),
+
+    // Job-model operations
+    addModelToJob: (jobId, modelId) => api.post(`/Jobs/${jobId}/model/${modelId}`),
+    removeModelFromJob: (jobId, modelId) => api.delete(`/Jobs/${jobId}/model/${modelId}`),
+
+    // Expenses management
+    getAllExpenses: () => api.get('/Expenses'),
+    getExpense: (id) => api.get(`/Expenses/${id}`),
+    getModelExpenses: (modelId) => api.get(`/Expenses/model/${modelId}`),
+    createExpense: (expenseData) => api.post('/Expenses', expenseData),
+    updateExpense: (id, expenseData) => api.put(`/Expenses/${id}`, expenseData),
+    deleteExpense: (id) => api.delete(`/Expenses/${id}`)
 };
 
-//Model service; what can a model do?
+// Model service
 export const modelService = {
-    getMyJobs: () => api.get('/jobs/mine'),
-    addExpense: (jobId, expenseData) => api.post(`/jobs/${jobId}/expenses`, expenseData)
+    // For models to access their own jobs and expenses
+    getMyJobs: (modelId) => api.get(`/Models/${modelId}/jobs`),
+    addExpense: (expenseData) => api.post('/Expenses', expenseData)
 };
 
 export default api;
