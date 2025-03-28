@@ -1,6 +1,6 @@
 // src/components/Navigation.jsx
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const Navigation = () => {
   const { currentUser, logout } = useAuth();

@@ -1,34 +1,33 @@
-// src/pages/manager/Models.jsx
+// src/pages/manager/Managers.jsx
 import { useState, useEffect } from 'react';
 import { managerService } from '../../services/api';
 
-const Models = () => {
-    const [models, setModels] = useState([]);
+const Managers = () => {
+    const [managers, setManagers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
-        password: '',
-        phoneNo: ''
+        password: ''
     });
 
-    // Load models when component mounts
+    // Load managers when component mounts
     useEffect(() => {
-        const fetchModels = async () => {
+        const fetchManagers = async () => {
             try {
                 // You would need to add this method to your managerService
-                const response = await managerService.getModels();
-                setModels(response.data);
+                const response = await managerService.getManagers();
+                setManagers(response.data);
                 setLoading(false);
             } catch (err) {
-                setError('Failed to load models: ' + (err.message || 'Unknown error'));
+                setError('Failed to load managers: ' + (err.message || 'Unknown error'));
                 setLoading(false);
             }
         };
 
-        fetchModels();
+        fetchManagers();
     }, []);
 
     const handleChange = (e) => {
@@ -42,33 +41,32 @@ const Models = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Call the API to create a new model
-            const response = await managerService.createModel(formData);
+            // Call the API to create a new manager
+            const response = await managerService.createManager(formData);
 
-            // Add the new model to the list
-            setModels([...models, response.data]);
+            // Add the new manager to the list
+            setManagers([...managers, response.data]);
 
             // Reset the form
             setFormData({
                 firstName: '',
                 lastName: '',
                 email: '',
-                password: '',
-                phoneNo: ''
+                password: ''
             });
 
         } catch (err) {
-            setError('Failed to create model: ' + (err.message || 'Unknown error'));
+            setError('Failed to create manager: ' + (err.message || 'Unknown error'));
         }
     };
 
     return (
-        <div className="models-page">
-            <h1>Models</h1>
+        <div className="managers-page">
+            <h1>Managers</h1>
 
-            {/* Create Model Form */}
-            <div className="create-model-form">
-                <h2>Create New Model</h2>
+            {/* Create Manager Form */}
+            <div className="create-manager-form">
+                <h2>Create New Manager</h2>
                 {error && <div className="alert alert-danger">{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -119,39 +117,26 @@ const Models = () => {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="phoneNo">Phone Number</label>
-                        <input
-                            type="text"
-                            id="phoneNo"
-                            name="phoneNo"
-                            value={formData.phoneNo}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <button type="submit">Create Model</button>
+                    <button type="submit">Create Manager</button>
                 </form>
             </div>
 
-            {/* Models List */}
-            <div className="models-list">
-                <h2>Models List</h2>
+            {/* Managers List */}
+            <div className="managers-list">
+                <h2>Managers List</h2>
                 {loading ? (
                     <p>Loading...</p>
                 ) : error ? (
                     <p className="error">{error}</p>
                 ) : (
-                    <div className="models-grid">
-                        {models.length === 0 ? (
-                            <p>No models available.</p>
+                    <div className="managers-grid">
+                        {managers.length === 0 ? (
+                            <p>No managers available.</p>
                         ) : (
-                            models.map((model) => (
-                                <div key={model.id} className="model-card">
-                                    <h3>{model.firstName} {model.lastName}</h3>
-                                    <p>Email: {model.email}</p>
-                                    <p>Phone: {model.phoneNo}</p>
+                            managers.map((manager) => (
+                                <div key={manager.id} className="manager-card">
+                                    <h3>{manager.firstName} {manager.lastName}</h3>
+                                    <p>Email: {manager.email}</p>
                                     {/* Add more details or actions as needed */}
                                 </div>
                             ))
@@ -163,4 +148,4 @@ const Models = () => {
     );
 };
 
-export default Models;
+export default Managers;
