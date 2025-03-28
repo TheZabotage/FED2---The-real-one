@@ -26,10 +26,19 @@ api.interceptors.request.use(
 // Authentication service
 export const authService = {
     login: async (email, password) => {
-        const response = await axios.post(`${API_URL}/Account/login`, { email, password });
-        if (response.data.jwt) {
-            localStorage.setItem('token', response.data.jwt);
-            return response.data;
+        try {
+            const response = await axios.post(`${API_URL}/Account/login`, { email, password });
+
+            // The response.data is directly the JWT token as a string
+            const token = response.data;
+
+            if (token) {
+                localStorage.setItem('token', token);
+                return { jwt: token }; // Return in expected format for your auth provider
+            }
+        } catch (error) {
+            console.error('Login error:', error.response?.data || error.message);
+            throw error;
         }
     },
     changePassword: (email, oldPassword, newPassword) => {
