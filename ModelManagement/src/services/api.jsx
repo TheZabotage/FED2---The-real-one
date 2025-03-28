@@ -48,7 +48,9 @@ export const managerService = {
     createJob: (jobData) => api.post('/jobs', jobData),
     addModelToJob: (jobId, modelId) => api.post(`/jobs/${jobId}/models/${modelId}`),
     removeModelFromJob: (jobId, modelId) => api.delete(`/jobs/${jobId}/models/${modelId}`),
-    getAllJobs: () => api.get('/jobs')
+    getAllJobs: () => api.get('/jobs'),
+    getModels: () => api.get('/models'),  // Add this method
+    getManagers: () => api.get('/account/managers')  // Add this method too
 };
 
 //Model service; what can a model do?
