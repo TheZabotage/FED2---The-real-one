@@ -47,13 +47,27 @@ export const AuthProvider = ({ children }) => {
         try {
             const data = await authService.login(email, password);
             const decoded = jwtDecode(data.jwt);
+
+            console.log("Decoded token:", decoded);
+
+            // Extract the values based on the actual token structure, used because when loggin in as manager, you would appear as model
+            const userEmail = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
+            const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            const modelId = decoded["ModelId"];
+
+            console.log("Email from token:", userEmail);
+            console.log("Role from token:", role);
+            console.log("isManager check:", role === "Manager");
+
             setCurrentUser({
-                email: decoded.email,
-                isManager: decoded.role === 'manager',
-                modelId: decoded.modelId // Only for models
+                email: userEmail,
+                isManager: role === "Manager", // Using the same check as in useEffect
+                modelId: modelId !== "-1" ? modelId : null
             });
+
             return true;
-        } catch {
+        } catch (err) {
+            console.error("Login error:", err);
             return false;
         }
     };

@@ -18,7 +18,10 @@ const Login = () => {
             setLoading(true);
             const success = await login(email, password);
             if (success) {
-                navigate('/dashboard');
+                // Delay because wrong credentials at first
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 100);
             } else {
                 setError('Failed to log in');
             }

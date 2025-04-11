@@ -15,8 +15,12 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
+        //Check if token is present
         if (token) {
+            console.log("Adding token to request");
             config.headers['Authorization'] = `Bearer ${token}`;
+        } else {
+            console.log("No token found for request");
         }
         return config;
     },
@@ -89,8 +93,13 @@ export const managerService = {
 // Model service
 export const modelService = {
     // For models to access their own jobs and expenses
-    getMyJobs: (modelId) => api.get(`/Models/${modelId}/jobs`),
-    addExpense: (expenseData) => api.post('/Expenses', expenseData)
+    //Added debugging because it doesn't work fucking work. PSS: Remember to check swagge once in a  while :DDD
+    getMyJobs: () => {
+        return api.get('/Jobs');
+    },
+    addExpense: (expenseData) => api.post('/Expenses', expenseData),
+    getMyExpenses: (modelId) => api.get(`/Expenses/model/${modelId}`)
+
 };
 
 export default api;

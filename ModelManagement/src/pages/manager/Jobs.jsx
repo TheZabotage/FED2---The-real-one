@@ -29,6 +29,42 @@ const Jobs = () => {
         fetchData();
     }, []);
 
+    const handleAddExpense = async (e) => {
+        e.preventDefault();
+        if (!selectedJobId) return;
+
+        try {
+            // Format expense data according to the API schema
+            const expenseData = {
+                modelId: currentUser.modelId,
+                jobId: selectedJobId,
+                date: expenseForm.date,
+                text: expenseForm.text,
+                amount: parseFloat(expenseForm.amount)
+            };
+
+            console.log("Submitting expense:", expenseData);
+
+            // Add the expense
+            await modelService.addExpense(expenseData);
+
+            // Reset form
+            setExpenseForm({
+                amount: '',
+                text: '',
+                date: new Date().toISOString().split('T')[0]
+            });
+            setSelectedJobId(null);
+
+            // Important: Refresh the jobs data to show the new expense
+            await fetchMyJobs();
+
+        } catch (err) {
+            console.error("Error adding expense:", err.response || err);
+            setError('Failed to add expense: ' + (err.response?.data || err.message || 'Unknown error'));
+        }
+    };
+
     const handleCreateJob = async (jobData) => {
         try {
             const formattedData = {
@@ -69,6 +105,8 @@ const Jobs = () => {
             setError('Failed to refresh jobs: ' + (err.message || 'Unknown error'));
         }
     };
+
+
 
     return (
         <div className="jobs-page">

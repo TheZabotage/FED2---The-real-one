@@ -1,4 +1,3 @@
-// src/pages/model/MyJobs.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { modelService } from '../../services/api';
 import useAuth from '../../hooks/useAuth';
@@ -10,30 +9,55 @@ const MyJobs = () => {
     const [selectedJobId, setSelectedJobId] = useState(null);
     const [expenseForm, setExpenseForm] = useState({
         amount: '',
-        text: '', // Changed from 'description' to match backend schema
-        date: new Date().toISOString().split('T')[0] // Adding date field required by API
+        text: '',
+        date: new Date().toISOString().split('T')[0]
     });
     const { currentUser } = useAuth();
 
-    // Use useCallback to memoize the fetchMyJobs function
-    const fetchMyJobs = useCallback(async () => {
-        if (!currentUser || !currentUser.modelId) return;
+    // Function to fetch jobs and expenses
+    const fetchJobsAndExpenses = useCallback(async () => {
+        if (!currentUser || !currentUser.modelId) {
+            setLoading(false);
+            return;
+        }
 
         try {
-            // Pass the model ID from the current user
-            const response = await modelService.getMyJobs(currentUser.modelId);
-            setJobs(response.data);
+            // 1. First fetch all jobs for the model
+            const jobsResponse = await modelService.getMyJobs();
+            const jobsData = jobsResponse.data;
+
+            // 2. Then fetch all expenses for the model
+            const expensesResponse = await modelService.getMyExpenses(currentUser.modelId);
+            const allExpenses = expensesResponse.data;
+
+            // 3. Organize expenses by job ID
+            const expensesByJobId = {};
+            allExpenses.forEach(expense => {
+                if (!expensesByJobId[expense.jobId]) {
+                    expensesByJobId[expense.jobId] = [];
+                }
+                expensesByJobId[expense.jobId].push(expense);
+            });
+
+            // 4. Merge the expenses into the jobs data
+            const jobsWithExpenses = jobsData.map(job => ({
+                ...job,
+                expenses: expensesByJobId[job.jobId] || []
+            }));
+
+            setJobs(jobsWithExpenses);
             setLoading(false);
         } catch (err) {
-            setError('Failed to load jobs: ' + (err.message || 'Unknown error'));
+            console.error("Error fetching data:", err);
+            setError('Failed to load data: ' + (err.response?.data || err.message || 'Unknown error'));
             setLoading(false);
         }
     }, [currentUser]);
 
-    // Now include fetchMyJobs in the dependency array
+    // Load jobs and expenses when component mounts
     useEffect(() => {
-        fetchMyJobs();
-    }, [fetchMyJobs]);
+        fetchJobsAndExpenses();
+    }, [fetchJobsAndExpenses]);
 
     const handleExpenseChange = (e) => {
         const { name, value } = e.target;
@@ -48,7 +72,7 @@ const MyJobs = () => {
         if (!selectedJobId) return;
 
         try {
-            // Format expense data according to the API schema
+            // Format expense data for API
             const expenseData = {
                 modelId: currentUser.modelId,
                 jobId: selectedJobId,
@@ -57,10 +81,10 @@ const MyJobs = () => {
                 amount: parseFloat(expenseForm.amount)
             };
 
-            // Use the correct endpoint to add expense
+            // Add the expense
             await modelService.addExpense(expenseData);
 
-            // Reset form and refresh jobs to show new expense
+            // Reset form
             setExpenseForm({
                 amount: '',
                 text: '',
@@ -68,12 +92,13 @@ const MyJobs = () => {
             });
             setSelectedJobId(null);
 
-            // Refresh jobs to show updated expenses
-            await fetchMyJobs();
+            // Important: Refresh the data after adding an expense
+            await fetchJobsAndExpenses();
         } catch (err) {
-            setError('Failed to add expense: ' + (err.message || 'Unknown error'));
+            setError('Failed to add expense: ' + (err.response?.data || err.message || 'Unknown error'));
         }
     };
+
 
     return (
         <div className="my-jobs-page">
