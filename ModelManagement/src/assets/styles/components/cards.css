@@ -1,0 +1,339 @@
+/* Card Components */
+
+/* Base Card */
+.card {
+    background-color: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+.card-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--primary-light);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--primary-dark);
+}
+
+.card-body {
+    padding: var(--spacing-lg);
+}
+
+.card-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: #fafafa;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Job Cards */
+.job-card {
+    background-color: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-lg);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+    .job-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+.job-card-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--primary-light);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .job-card-header h3 {
+        margin: 0;
+        color: var(--primary-dark);
+    }
+
+.job-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.job-details {
+    padding: var(--spacing-lg);
+}
+
+    .job-details p {
+        margin-bottom: var(--spacing-sm);
+    }
+
+.job-models,
+.job-expenses {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: #fafafa;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Model Cards */
+.model-card {
+    background-color: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-lg);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+    .model-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+.model-card-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--primary-light);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .model-card-header h3 {
+        margin: 0;
+        color: var(--primary-dark);
+    }
+
+.model-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.model-details {
+    padding: var(--spacing-lg);
+}
+
+    .model-details p {
+        margin-bottom: var(--spacing-sm);
+    }
+
+/* Manager Cards */
+.manager-card {
+    background-color: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-lg);
+    transition: var(--transition);
+    overflow: hidden;
+    padding: var(--spacing-lg);
+}
+
+    .manager-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+/* Avatar Section */
+.model-avatar-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.model-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    margin-right: var(--spacing-md);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.model-contact-info {
+    flex: 1;
+}
+
+/* Physical Details Badges */
+.physical-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+}
+
+.detail-badge {
+    background-color: #f1f1f1;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Section Headings */
+.model-physical-info,
+.additional-details,
+.address-details,
+.comments-section {
+    margin-top: var(--spacing-lg);
+}
+
+    .model-physical-info h4,
+    .address-details h4,
+    .comments-section h4 {
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-sm);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+.comments-text {
+    background-color: #f9f9f9;
+    padding: var(--spacing-sm);
+    border-radius: 4px;
+    border-left: 3px solid var(--border-color);
+    font-style: italic;
+    color: var(--text-light);
+}
+
+/* Stat cards for dashboard */
+.stat-card {
+    background-color: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: var(--transition);
+    height: 100%;
+}
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .stat-card .stat-icon {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+        color: var(--primary-color);
+    }
+
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+        color: var(--primary-dark);
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+/* Action Cards */
+.action-card {
+    background-color: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: var(--transition);
+    text-decoration: none;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+}
+
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+        color: var(--primary-color);
+    }
+
+.action-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.action-title {
+    font-weight: 500;
+}
+
+/* Expenses List */
+.expenses-list {
+    list-style: none;
+    padding: 0;
+}
+
+.expense-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .expense-item:last-child {
+        border-bottom: none;
+    }
+
+.expense-amount {
+    font-weight: bold;
+    color: var(--primary-dark);
+}
+
+.expense-text {
+    color: var(--text-color);
+}
+
+.expense-date {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .model-avatar-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .model-avatar {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .expense-item {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        row-gap: var(--spacing-xs);
+    }
+
+    .expense-text {
+        grid-column: 1 / -1;
+    }
+}

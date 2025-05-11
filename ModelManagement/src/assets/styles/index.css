@@ -1,0 +1,15 @@
+/* Base styles and variables */
+@import './base.css';
+@import './layout.css';
+
+/* Component styles */
+@import './components/navigation.css';
+@import './components/buttons.css';
+@import './components/cards.css';
+@import './components/forms.css';
+@import './components/tables.css';
+@import './components/modals.css';
+
+/* Page-specific styles */
+@import './pages/dashboard.css';
+@import './pages/login.css';

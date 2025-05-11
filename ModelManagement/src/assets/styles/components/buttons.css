@@ -1,0 +1,158 @@
+/* Button Components */
+
+/* Base Button Styles */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+/* Primary Button */
+.btn-primary,
+.submit-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 24px;
+}
+
+    .btn-primary:hover,
+    .submit-button:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+/* Secondary Button */
+.btn-secondary,
+.add-model-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+    .btn-secondary:hover,
+    .add-model-btn:hover {
+        background-color: var(--secondary-dark);
+    }
+
+/* Danger Button */
+.btn-danger,
+.delete-btn,
+.remove-model-btn {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+    .btn-danger:hover,
+    .delete-btn:hover,
+    .remove-model-btn:hover {
+        background-color: #d32f2f;
+    }
+
+/* Outline Button */
+.btn-outline,
+.cancel-button,
+.cancel-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+}
+
+    .btn-outline:hover,
+    .cancel-button:hover,
+    .cancel-btn:hover {
+        background-color: #f5f5f5;
+    }
+
+/* Disabled Button State */
+.btn:disabled,
+.submit-button:disabled,
+.add-model-btn:disabled {
+    background-color: #bdbdbd;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Button with Loading Spinner */
+.btn-loading,
+.spinner-btn {
+    position: relative;
+    padding-left: 40px;
+}
+
+.spinner-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Button Groups */
+.btn-group {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.form-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    margin-left: var(--spacing-xl);
+}
+
+/* Action Buttons */
+.action-btn,
+.edit-btn,
+.view-btn {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+/* View Button */
+.view-button {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+    .view-button:hover {
+        background-color: var(--primary-dark);
+    }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .form-buttons {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+        .form-buttons .btn {
+            width: 100%;
+        }
+
+    .btn-group {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+    }
+}

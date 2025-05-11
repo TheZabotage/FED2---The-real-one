@@ -10,7 +10,6 @@ import Managers from './pages/manager/Managers';
 import Jobs from './pages/manager/Jobs';
 import MyJobs from './pages/model/MyJobs';
 import Unauthorized from './pages/Unauthorized';
-import './App.css';
 
 function App() {
     return (

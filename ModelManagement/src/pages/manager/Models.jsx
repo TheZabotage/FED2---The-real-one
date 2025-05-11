@@ -146,34 +146,7 @@ const Models = () => {
 
     return (
         <div className="models-page fade-in">
-            <div className="page-header">
-                <h1>Models</h1>
-                <div className="actions">
-                    <button
-                        className="btn btn-primary"
-                        onClick={toggleForm}
-                    >
-                        {showForm ? 'Hide Form' : (formMode === 'edit' ? 'Edit Model' : 'Add New Model')}
-                    </button>
-                </div>
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            {/* Model Form - conditionally shown */}
-            {showForm && (
-                <div className="slide-up">
-                    <h2>{formMode === 'create' ? 'Create New Model' : 'Edit Model'}</h2>
-                    <ModelForm
-                        initialData={editingModel || {}}
-                        onSubmit={handleSubmitModel}
-                        submitButtonText={formMode === 'create' ? 'Create Model' : 'Update Model'}
-                        isLoading={formLoading}
-                        onCancel={formMode === 'edit' ? handleCancelEdit : null}
-                        hidePassword={formMode === 'edit'} // Don't require password when editing
-                    />
-                </div>
-            )}
+            
 
             {/* Search and Filter Section */}
             <div className="filters-section">
@@ -225,6 +198,34 @@ const Models = () => {
                                 onDelete={handleDeleteModel}
                             />
                         ))}
+                    </div>
+                )}
+                <div className="page-header">
+                    <h1>Models</h1>
+                    <div className="actions">
+                        <button
+                            className="btn btn-primary"
+                            onClick={toggleForm}
+                        >
+                            {showForm ? 'Hide Form' : (formMode === 'edit' ? 'Edit Model' : 'Add New Model')}
+                        </button>
+                    </div>
+                </div>
+
+                {error && <div className="error-message">{error}</div>}
+
+                {/* Model Form - conditionally shown */}
+                {showForm && (
+                    <div className="slide-up">
+                        <h2>{formMode === 'create' ? 'Create New Model' : 'Edit Model'}</h2>
+                        <ModelForm
+                            initialData={editingModel || {}}
+                            onSubmit={handleSubmitModel}
+                            submitButtonText={formMode === 'create' ? 'Create Model' : 'Update Model'}
+                            isLoading={formLoading}
+                            onCancel={formMode === 'edit' ? handleCancelEdit : null}
+                            hidePassword={formMode === 'edit'} // Don't require password when editing
+                        />
                     </div>
                 )}
             </div>

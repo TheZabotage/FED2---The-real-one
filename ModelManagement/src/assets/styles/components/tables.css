@@ -1,0 +1,104 @@
+/* Table Components */
+
+/* Responsive Table Container */
+.table-responsive {
+	overflow-x: auto;
+	background-color: var(--card-color);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	margin-top: var(--spacing-md);
+	margin-bottom: var(--spacing-lg);
+}
+
+/* Base Data Table */
+.data-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+	.data-table th,
+	.data-table td {
+		padding: var(--spacing-md);
+		text-align: left;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.data-table th {
+		background-color: #f8f9fa;
+		font-weight: 600;
+		color: var(--primary-dark);
+		position: sticky;
+		top: 0;
+	}
+
+	.data-table tr:hover {
+		background-color: #f5f7fa;
+	}
+
+	.data-table tr:last-child td {
+		border-bottom: none;
+	}
+
+/* Recent Jobs Table */
+.recent-jobs-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+	.recent-jobs-table th {
+		text-align: left;
+		padding: 12px 15px;
+		background-color: #f8f9fa;
+		border-bottom: 2px solid var(--primary-color);
+		color: var(--primary-dark);
+		font-weight: 600;
+	}
+
+	.recent-jobs-table td {
+		padding: 12px 15px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.recent-jobs-table tr:last-child td {
+		border-bottom: none;
+	}
+
+	.recent-jobs-table tr:hover {
+		background-color: rgba(52, 152, 219, 0.05);
+	}
+
+/* Recent Jobs Container */
+.recent-jobs-container {
+	background-color: white;
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	margin-bottom: var(--spacing-xl);
+	overflow: hidden;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+	.data-table th,
+	.data-table td,
+	.recent-jobs-table th,
+	.recent-jobs-table td {
+		padding: 10px 12px;
+	}
+}
+
+@media (max-width: 768px) {
+	.data-table {
+		min-width: 650px; /* Force horizontal scroll on small screens */
+	}
+
+	.recent-jobs-table {
+		min-width: 650px;
+	}
+}
+
+@media (max-width: 576px) {
+	.recent-jobs-table th:nth-child(4),
+	.recent-jobs-table td:nth-child(4) {
+		display: none; /* Hide duration column on mobile */
+	}
+}
