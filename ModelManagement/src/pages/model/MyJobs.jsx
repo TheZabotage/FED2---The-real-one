@@ -1,17 +1,16 @@
+// src/pages/model/MyJobs.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { modelService } from '../../services/api';
 import useAuth from '../../hooks/useAuth';
+import JobCard from '../../components/jobs/JobCard'; // We'll create this next
+import ExpenseForm from '../../components/forms/ExpenseForm'; // We'll create this after
 
 const MyJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedJobId, setSelectedJobId] = useState(null);
-    const [expenseForm, setExpenseForm] = useState({
-        amount: '',
-        text: '',
-        date: new Date().toISOString().split('T')[0]
-    });
+    const [formLoading, setFormLoading] = useState(false);
     const { currentUser } = useAuth();
 
     // Function to fetch jobs and expenses
@@ -59,52 +58,65 @@ const MyJobs = () => {
         fetchJobsAndExpenses();
     }, [fetchJobsAndExpenses]);
 
-    const handleExpenseChange = (e) => {
-        const { name, value } = e.target;
-        setExpenseForm({
-            ...expenseForm,
-            [name]: value
-        });
+    // Handle selecting a job for adding an expense
+    const handleSelectJob = (jobId) => {
+        setSelectedJobId(jobId);
     };
 
-    const handleAddExpense = async (e) => {
-        e.preventDefault();
-        if (!selectedJobId) return;
+    // Handle canceling expense addition
+    const handleCancelExpense = () => {
+        setSelectedJobId(null);
+    };
 
+    // Handle adding an expense
+    const handleAddExpense = async (expenseData) => {
+        if (!selectedJobId || !currentUser?.modelId) return;
+
+        setFormLoading(true);
         try {
             // Format expense data for API
-            const expenseData = {
+            const submitData = {
                 modelId: currentUser.modelId,
                 jobId: selectedJobId,
-                date: expenseForm.date,
-                text: expenseForm.text,
-                amount: parseFloat(expenseForm.amount)
+                ...expenseData
             };
 
             // Add the expense
-            await modelService.addExpense(expenseData);
+            await modelService.addExpense(submitData);
 
-            // Reset form
-            setExpenseForm({
-                amount: '',
-                text: '',
-                date: new Date().toISOString().split('T')[0]
-            });
+            // Reset state
             setSelectedJobId(null);
 
-            // Important: Refresh the data after adding an expense
+            // Refresh the data
             await fetchJobsAndExpenses();
+
+            return true;
         } catch (err) {
             setError('Failed to add expense: ' + (err.response?.data || err.message || 'Unknown error'));
+            throw err;
+        } finally {
+            setFormLoading(false);
         }
     };
-
 
     return (
         <div className="my-jobs-page">
             <h1>My Jobs</h1>
 
             {error && <div className="error-message">{error}</div>}
+
+            {selectedJobId && (
+                <div className="add-expense-form-container">
+                    <h2>Add Expense</h2>
+                    <ExpenseForm
+                        onSubmit={handleAddExpense}
+                        onCancel={handleCancelExpense}
+                        isLoading={formLoading}
+                        jobId={selectedJobId}
+                        job={jobs.find(job => job.jobId === selectedJobId)}
+                    />
+                </div>
+            )}
 
             {loading ? (
                 <p>Loading your jobs...</p>
@@ -113,95 +125,13 @@ const MyJobs = () => {
             ) : (
                 <div className="jobs-container">
                     {jobs.map(job => (
-                        <div key={job.jobId} className="job-card">
-                            <h3>{job.customer}</h3>
-                            <p><strong>Start Date:</strong> {new Date(job.startDate).toLocaleDateString()}</p>
-                            <p><strong>Duration:</strong> {job.days} days</p>
-                            <p><strong>Location:</strong> {job.location}</p>
-                            {job.comments && <p><strong>Comments:</strong> {job.comments}</p>}
-
-                            <div className="job-expenses">
-                                <h4>Expenses</h4>
-                                {job.expenses && job.expenses.length > 0 ? (
-                                    <ul className="expenses-list">
-                                        {job.expenses.map(expense => (
-                                            <li key={expense.expenseId} className="expense-item">
-                                                <span>${expense.amount.toFixed(2)}</span>
-                                                <span>{expense.text}</span>
-                                                <span>{new Date(expense.date).toLocaleDateString()}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No expenses added yet.</p>
-                                )}
-                            </div>
-
-                            <button
-                                onClick={() => setSelectedJobId(job.jobId)}
-                                className="add-expense-button"
-                            >
-                                Add Expense
-                            </button>
-                        </div>
+                        <JobCard
+                            key={job.jobId}
+                            job={job}
+                            showExpenses={true}
+                            onAddExpense={() => handleSelectJob(job.jobId)}
+                        />
                     ))}
-                </div>
-            )}
-
-            {/* Add Expense Form */}
-            {selectedJobId && (
-                <div className="add-expense-form">
-                    <h3>Add Expense</h3>
-                    <form onSubmit={handleAddExpense}>
-                        <div className="form-group">
-                            <label htmlFor="amount">Amount ($)</label>
-                            <input
-                                type="number"
-                                id="amount"
-                                name="amount"
-                                step="0.01"
-                                min="0.01"
-                                value={expenseForm.amount}
-                                onChange={handleExpenseChange}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="text">Description</label>
-                            <input
-                                type="text"
-                                id="text"
-                                name="text"
-                                value={expenseForm.text}
-                                onChange={handleExpenseChange}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="date">Date</label>
-                            <input
-                                type="date"
-                                id="date"
-                                name="date"
-                                value={expenseForm.date}
-                                onChange={handleExpenseChange}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-buttons">
-                            <button type="submit" className="submit-button">Add Expense</button>
-                            <button
-                                type="button"
-                                className="cancel-button"
-                                onClick={() => setSelectedJobId(null)}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
                 </div>
             )}
         </div>

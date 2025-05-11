@@ -1,15 +1,335 @@
+﻿import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import { managerService, modelService } from '../services/api';
 
 const Dashboard = () => {
     const { currentUser } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [stats, setStats] = useState({
+        totalModels: 0,
+        totalJobs: 0,
+        activeJobs: 0,
+        recentJobs: []
+    });
+    const [modelStats, setModelStats] = useState({
+        totalJobs: 0,
+        upcomingJobs: []
+    });
+
+    useEffect(() => {
+        // Different data fetching based on user role
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                if (currentUser.isManager) {
+                    await fetchManagerData();
+                } else {
+                    await fetchModelData();
+                }
+            } catch (err) {
+                console.error("Dashboard error:", err);
+                setError('Failed to load dashboard data: ' + (err.message || 'Unknown error'));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [currentUser]);
+
+    const fetchManagerData = async () => {
+        try {
+            // Fetch models
+            const modelsResponse = await managerService.getModels();
+
+            // Fetch all jobs
+            const jobsResponse = await managerService.getAllJobs();
+            const jobs = jobsResponse.data;
+
+            // Calculate active jobs (starting from today or in the future)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const activeJobs = jobs.filter(job => {
+                const startDate = new Date(job.startDate);
+                startDate.setHours(0, 0, 0, 0);
+
+                // End date is start date + days
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + parseInt(job.days));
+
+                return endDate >= today;
+            });
+
+            // Get 5 most recent jobs
+            const recentJobs = [...jobs]
+                .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+                .slice(0, 5);
+
+            setStats({
+                totalModels: modelsResponse.data.length,
+                totalJobs: jobs.length,
+                activeJobs: activeJobs.length,
+                recentJobs
+            });
+        } catch (err) {
+            console.error("Error fetching manager data:", err);
+            throw err;
+        }
+    };
+
+    const fetchModelData = async () => {
+        try {
+            // Fetch model's jobs
+            const jobsResponse = await modelService.getMyJobs();
+            const jobs = jobsResponse.data;
+
+            // Calculate upcoming jobs (starting from today or in the future)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const upcomingJobs = jobs.filter(job => {
+                const startDate = new Date(job.startDate);
+                startDate.setHours(0, 0, 0, 0);
+                return startDate >= today;
+            })
+                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+                .slice(0, 5);
+
+            setModelStats({
+                totalJobs: jobs.length,
+                upcomingJobs
+            });
+        } catch (err) {
+            console.error("Error fetching model data:", err);
+            throw err;
+        }
+    };
+
+    // Format date for display
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString();
+    };
+
+    // Render manager dashboard
+    const renderManagerDashboard = () => (
+        <div className="manager-dashboard fade-in">
+            <div className="welcome-section">
+                <h2>Welcome back, {currentUser.email}</h2>
+                <p className="page-description">
+                    Here's an overview of your model management agency's current status.
+                </p>
+            </div>
+
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <div className="stat-icon">👤</div>
+                    <div className="stat-value">{stats.totalModels}</div>
+                    <div className="stat-label">Total Models</div>
+                    <Link to="/models" className="btn btn-outline" style={{ marginTop: '15px' }}>
+                        Manage Models
+                    </Link>
+                </div>
+
+                <div className="stat-card">
+                    <div className="stat-icon">💼</div>
+                    <div className="stat-value">{stats.totalJobs}</div>
+                    <div className="stat-label">Total Jobs</div>
+                    <Link to="/jobs" className="btn btn-outline" style={{ marginTop: '15px' }}>
+                        Manage Jobs
+                    </Link>
+                </div>
+
+                <div className="stat-card">
+                    <div className="stat-icon">🗓️</div>
+                    <div className="stat-value">{stats.activeJobs}</div>
+                    <div className="stat-label">Active Jobs</div>
+                    <Link to="/jobs" className="btn btn-outline" style={{ marginTop: '15px' }}>
+                        View Active Jobs
+                    </Link>
+                </div>
+            </div>
+
+            <div className="recent-jobs-section">
+                <h3>Recent Jobs</h3>
+
+                {stats.recentJobs.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-icon">📅</div>
+                        <h3 className="empty-state-title">No jobs yet</h3>
+                        <p className="empty-state-description">
+                            You haven't created any jobs yet. Create your first job to get started.
+                        </p>
+                        <Link to="/jobs" className="btn btn-primary">
+                            Create Job
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="table-responsive">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Location</th>
+                                    <th>Start Date</th>
+                                    <th>Duration</th>
+                                    <th>Models</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {stats.recentJobs.map(job => (
+                                    <tr key={job.jobId}>
+                                        <td>{job.customer}</td>
+                                        <td>{job.location}</td>
+                                        <td>{formatDate(job.startDate)}</td>
+                                        <td>{job.days} days</td>
+                                        <td>{job.models?.length || 0}</td>
+                                        <td>
+                                            <Link to={`/jobs?id=${job.jobId}`} className="btn btn-outline">
+                                                View
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <Link to="/jobs" className="btn btn-primary">
+                        View All Jobs
+                    </Link>
+                </div>
+            </div>
+
+            <div className="quick-actions">
+                <h3>Quick Actions</h3>
+                <div className="actions-grid">
+                    <Link to="/models" className="action-card">
+                        <div className="action-icon">➕</div>
+                        <div className="action-title">Add New Model</div>
+                    </Link>
+
+                    <Link to="/jobs" className="action-card">
+                        <div className="action-icon">📝</div>
+                        <div className="action-title">Create New Job</div>
+                    </Link>
+
+                    <Link to="/managers" className="action-card">
+                        <div className="action-icon">👥</div>
+                        <div className="action-title">Manage Team</div>
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Render model dashboard
+    const renderModelDashboard = () => (
+        <div className="model-dashboard fade-in">
+            <div className="welcome-section">
+                <h2>Welcome, {currentUser.email}</h2>
+                <p className="page-description">
+                    Here's an overview of your upcoming jobs and schedule.
+                </p>
+            </div>
+
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <div className="stat-icon">💼</div>
+                    <div className="stat-value">{modelStats.totalJobs}</div>
+                    <div className="stat-label">Total Jobs</div>
+                    <Link to="/my-jobs" className="btn btn-outline" style={{ marginTop: '15px' }}>
+                        View All Jobs
+                    </Link>
+                </div>
+
+                <div className="stat-card">
+                    <div className="stat-icon">📅</div>
+                    <div className="stat-value">{modelStats.upcomingJobs.length}</div>
+                    <div className="stat-label">Upcoming Jobs</div>
+                </div>
+            </div>
+
+            <div className="upcoming-jobs-section">
+                <h3>Upcoming Jobs</h3>
+
+                {modelStats.upcomingJobs.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-icon">📅</div>
+                        <h3 className="empty-state-title">No upcoming jobs</h3>
+                        <p className="empty-state-description">
+                            You don't have any upcoming jobs scheduled at the moment.
+                        </p>
+                        <Link to="/my-jobs" className="btn btn-primary">
+                            View All Jobs
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="table-responsive">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Location</th>
+                                    <th>Start Date</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {modelStats.upcomingJobs.map(job => (
+                                    <tr key={job.jobId}>
+                                        <td>{job.customer}</td>
+                                        <td>{job.location}</td>
+                                        <td>{formatDate(job.startDate)}</td>
+                                        <td>{job.days} days</td>
+                                        <td>
+                                            <Link to={`/my-jobs?id=${job.jobId}`} className="btn btn-outline">
+                                                View Details
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            <div className="quick-actions">
+                <h3>Quick Actions</h3>
+                <div className="actions-grid">
+                    <Link to="/my-jobs" className="action-card">
+                        <div className="action-icon">💰</div>
+                        <div className="action-title">Add Expense</div>
+                    </Link>
+
+                    <Link to="/profile" className="action-card">
+                        <div className="action-icon">👤</div>
+                        <div className="action-title">Update Profile</div>
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="dashboard">
+        <div className="dashboard-page fade-in">
             <h1>Dashboard</h1>
-            <p>Welcome, {currentUser.email}</p>
-            <p>You are logged in as {currentUser.isManager ? 'Manager' : 'Model'}.</p>
-            {!currentUser.isManager && (
-                <p>Model ID: {currentUser.modelId}</p>
+
+            {error && <div className="error-message">{error}</div>}
+
+            {loading ? (
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                </div>
+            ) : (
+                currentUser.isManager ? renderManagerDashboard() : renderModelDashboard()
             )}
         </div>
     );

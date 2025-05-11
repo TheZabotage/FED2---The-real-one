@@ -1,40 +1,30 @@
-import { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { managerService } from '../../services/api';
+import ModelForm from '../../components/forms/ModelForm';
+import ModelCard from '../../components/models/ModelCard';
 
 const Models = () => {
     const [models, setModels] = useState([]);
+    const [filteredModels, setFilteredModels] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState('');
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        phoneNo: '',
-        // Add the missing required fields
-        addressLine1: '',
-        addressLine2: '',
-        zip: '',
-        city: '',
-        country: '',
-        birthDate: '',
-        nationality: '',
-        height: '',
-        shoeSize: '', // Note: API uses "shoeSize" not "shoes"
-        hairColor: '',
-        eyeColor: '',
-        comments: ''
-    });
+    const [formMode, setFormMode] = useState('create'); // 'create' or 'edit'
+    const [editingModel, setEditingModel] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showForm, setShowForm] = useState(true);
 
     // Load models when component mounts
     useEffect(() => {
         const fetchModels = async () => {
             try {
+                setLoading(true);
                 const response = await managerService.getModels();
                 setModels(response.data);
+                setFilteredModels(response.data);
                 setLoading(false);
             } catch (err) {
-                setError('Failed to load models: ' + (err.message || 'Unknown error'));
+                setError('Failed to load models: ' + (err.message || err.response?.data || 'Unknown error'));
                 setLoading(false);
             }
         };
@@ -42,314 +32,199 @@ const Models = () => {
         fetchModels();
     }, []);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
+    // Filter models when search term changes
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredModels(models);
+            return;
+        }
 
+        const lowerCaseSearch = searchTerm.toLowerCase();
+        const filtered = models.filter(model =>
+            model.firstName.toLowerCase().includes(lowerCaseSearch) ||
+            model.lastName.toLowerCase().includes(lowerCaseSearch) ||
+            model.email.toLowerCase().includes(lowerCaseSearch) ||
+            (model.phoneNo && model.phoneNo.toLowerCase().includes(lowerCaseSearch))
+        );
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+        setFilteredModels(filtered);
+    }, [searchTerm, models]);
+
+    // Create a new model
+    const handleCreateModel = async (modelData) => {
+        setFormLoading(true);
         try {
-            // Format the data according to the API's expected format
-            // Note: ALL fields should be strings, not numbers
-            const modelData = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                password: formData.password,
-                phoneNo: formData.phoneNo,
-                addressLine1: formData.addressLine1 || "",
-                addressLine2: formData.addressLine2 || "",
-                zip: formData.zip || "",
-                city: formData.city || "",
-                country: formData.country || "",
-                // Format birthDate as ISO string if provided
-                birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : "",
-                nationality: formData.nationality || "",
-                // Keep all values as strings
-                height: formData.height ? String(formData.height) : "",
-                shoeSize: formData.shoeSize ? String(formData.shoeSize) : "",
-                hairColor: formData.hairColor || "",
-                eyeColor: formData.eyeColor || "",
-                comments: formData.comments || ""
-            };
-
-            console.log("Submitting model data:", modelData);
-
-            // Call the API to create a new model
             const response = await managerService.createModel(modelData);
-
-            // Add the new model to the list
             setModels([...models, response.data]);
-
-            // Reset the form
-            setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
-                password: '',
-                phoneNo: '',
-                addressLine1: '',
-                addressLine2: '',
-                zip: '',
-                city: '',
-                country: '',
-                birthDate: '',
-                nationality: '',
-                height: '',
-                shoeSize: '',
-                hairColor: '',
-                eyeColor: '',
-                comments: ''
-            });
-
+            setShowForm(false); // Hide the form after successful creation
+            return response.data;
         } catch (err) {
             console.error("Create model error:", err.response?.data || err);
             setError('Failed to create model: ' + (err.response?.data || err.message || 'Unknown error'));
+            throw err;
+        } finally {
+            setFormLoading(false);
+        }
+    };
+
+    // Update an existing model
+    const handleUpdateModel = async (modelData) => {
+        if (!editingModel) return;
+
+        setFormLoading(true);
+        try {
+            // When updating, we don't send the password unless it's changed
+            const submitData = { ...modelData };
+            if (!submitData.password) {
+                delete submitData.password;
+            }
+
+            const response = await managerService.updateModel(editingModel.modelId, submitData);
+
+            // Update the models array with the updated model
+            const updatedModels = models.map(model =>
+                model.modelId === editingModel.modelId ? response.data : model
+            );
+
+            setModels(updatedModels);
+            setEditingModel(null);
+            setFormMode('create');
+            setShowForm(false); // Hide the form after successful update
+
+            return response.data;
+        } catch (err) {
+            setError('Failed to update model: ' + (err.response?.data || err.message || 'Unknown error'));
+            throw err;
+        } finally {
+            setFormLoading(false);
+        }
+    };
+
+    // Handle form submission based on mode
+    const handleSubmitModel = async (modelData) => {
+        if (formMode === 'create') {
+            return handleCreateModel(modelData);
+        } else {
+            return handleUpdateModel(modelData);
+        }
+    };
+
+    // Set up model editing
+    const handleEditModel = (model) => {
+        setEditingModel(model);
+        setFormMode('edit');
+        setShowForm(true);
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Cancel editing
+    const handleCancelEdit = () => {
+        setEditingModel(null);
+        setFormMode('create');
+    };
+
+    // Delete a model
+    const handleDeleteModel = async (modelId) => {
+        try {
+            await managerService.deleteModel(modelId);
+            setModels(models.filter(model => model.modelId !== modelId));
+        } catch (err) {
+            setError('Failed to delete model: ' + (err.response?.data || err.message || 'Unknown error'));
+        }
+    };
+
+    // Toggle form visibility
+    const toggleForm = () => {
+        setShowForm(!showForm);
+        if (!showForm && formMode === 'edit') {
+            // Reset to create mode if we're showing the form and were in edit mode
+            setEditingModel(null);
+            setFormMode('create');
         }
     };
 
     return (
-        <div className="models-page">
-            <h1>Models</h1>
+        <div className="models-page fade-in">
+            <div className="page-header">
+                <h1>Models</h1>
+                <div className="actions">
+                    <button
+                        className="btn btn-primary"
+                        onClick={toggleForm}
+                    >
+                        {showForm ? 'Hide Form' : (formMode === 'edit' ? 'Edit Model' : 'Add New Model')}
+                    </button>
+                </div>
+            </div>
 
-            {/* Create Model Form */}
-            <div className="create-model-form">
-                <h2>Create New Model</h2>
-                {error && <div className="alert alert-danger">{error}</div>}
-                <form onSubmit={handleSubmit}>
-                    {/* Basic Information */}
-                    <h3>Basic Information</h3>
-                    <div className="form-group">
-                        <label htmlFor="firstName">First Name*</label>
-                        <input
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+            {error && <div className="error-message">{error}</div>}
 
-                    <div className="form-group">
-                        <label htmlFor="lastName">Last Name*</label>
-                        <input
-                            type="text"
-                            id="lastName"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+            {/* Model Form - conditionally shown */}
+            {showForm && (
+                <div className="slide-up">
+                    <h2>{formMode === 'create' ? 'Create New Model' : 'Edit Model'}</h2>
+                    <ModelForm
+                        initialData={editingModel || {}}
+                        onSubmit={handleSubmitModel}
+                        submitButtonText={formMode === 'create' ? 'Create Model' : 'Update Model'}
+                        isLoading={formLoading}
+                        onCancel={formMode === 'edit' ? handleCancelEdit : null}
+                        hidePassword={formMode === 'edit'} // Don't require password when editing
+                    />
+                </div>
+            )}
 
-                    <div className="form-group">
-                        <label htmlFor="email">Email*</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="password">Password*</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="phoneNo">Phone Number*</label>
-                        <input
-                            type="text"
-                            id="phoneNo"
-                            name="phoneNo"
-                            value={formData.phoneNo}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    {/* Address Information */}
-                    <h3>Address Information</h3>
-                    <div className="form-group">
-                        <label htmlFor="addressLine1">Address Line 1</label>
-                        <input
-                            type="text"
-                            id="addressLine1"
-                            name="addressLine1"
-                            value={formData.addressLine1}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="addressLine2">Address Line 2</label>
-                        <input
-                            type="text"
-                            id="addressLine2"
-                            name="addressLine2"
-                            value={formData.addressLine2}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="zip">ZIP/Postal Code</label>
-                        <input
-                            type="text"
-                            id="zip"
-                            name="zip"
-                            value={formData.zip}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="city">City</label>
-                        <input
-                            type="text"
-                            id="city"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="country">Country</label>
-                        <input
-                            type="text"
-                            id="country"
-                            name="country"
-                            value={formData.country}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Personal Details */}
-                    <h3>Personal Details</h3>
-                    <div className="form-group">
-                        <label htmlFor="birthDate">Birth Date</label>
-                        <input
-                            type="date"
-                            id="birthDate"
-                            name="birthDate"
-                            value={formData.birthDate}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="nationality">Nationality</label>
-                        <input
-                            type="text"
-                            id="nationality"
-                            name="nationality"
-                            value={formData.nationality}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {/* Physical Characteristics */}
-                    <h3>Physical Characteristics</h3>
-                    <div className="form-group">
-                        <label htmlFor="height">Height</label>
-                        <input
-                            type="text"
-                            id="height"
-                            name="height"
-                            value={formData.height}
-                            onChange={handleChange}
-                            placeholder="e.g., 175"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="shoeSize">Shoe Size</label>
-                        <input
-                            type="text"
-                            id="shoeSize"
-                            name="shoeSize"
-                            value={formData.shoeSize}
-                            onChange={handleChange}
-                            placeholder="e.g., 42"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="hairColor">Hair Color</label>
-                        <input
-                            type="text"
-                            id="hairColor"
-                            name="hairColor"
-                            value={formData.hairColor}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="eyeColor">Eye Color</label>
-                        <input
-                            type="text"
-                            id="eyeColor"
-                            name="eyeColor"
-                            value={formData.eyeColor}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="comments">Comments</label>
-                        <textarea
-                            id="comments"
-                            name="comments"
-                            value={formData.comments}
-                            onChange={handleChange}
-                            rows="3"
-                        />
-                    </div>
-
-                    <button type="submit" className="submit-button">Create Model</button>
-                </form>
-                <p className="form-note">* Required fields</p>
+            {/* Search and Filter Section */}
+            <div className="filters-section">
+                <div className="search-input">
+                    <input
+                        type="text"
+                        placeholder="Search models..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="results-count">
+                    {filteredModels.length} {filteredModels.length === 1 ? 'model' : 'models'} found
+                </div>
             </div>
 
             {/* Models List */}
             <div className="models-list">
-                <h2>Models List</h2>
+                <h2>Models</h2>
                 {loading ? (
-                    <p>Loading...</p>
-                ) : error ? (
-                    <p className="error">{error}</p>
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                    </div>
+                ) : filteredModels.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-icon">🔍</div>
+                        <h3 className="empty-state-title">No models found</h3>
+                        <p className="empty-state-description">
+                            {searchTerm ?
+                                `No models match your search for "${searchTerm}". Try a different search term.` :
+                                "There are no models yet. Create your first model using the form above."}
+                        </p>
+                        {searchTerm && (
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setSearchTerm('')}
+                            >
+                                Clear Search
+                            </button>
+                        )}
+                    </div>
                 ) : (
                     <div className="models-grid">
-                        {models.length === 0 ? (
-                            <p>No models available.</p>
-                        ) : (
-                            models.map((model) => (
-                                <div key={model.id} className="model-card">
-                                    <h3>{model.firstName} {model.lastName}</h3>
-                                    <p>Email: {model.email}</p>
-                                    <p>Phone: {model.phoneNo}</p>
-                                    {/* Add more details or actions as needed */}
-                                </div>
-                            ))
-                        )}
+                        {filteredModels.map((model) => (
+                            <ModelCard
+                                key={model.modelId}
+                                model={model}
+                                onEdit={handleEditModel}
+                                onDelete={handleDeleteModel}
+                            />
+                        ))}
                     </div>
                 )}
             </div>

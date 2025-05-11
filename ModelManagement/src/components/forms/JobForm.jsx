@@ -1,13 +1,25 @@
-// src/components/forms/JobForm.jsx
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
-const JobForm = ({ onSubmit }) => {
-    const [formData, setFormData] = useState({
+const JobForm = ({
+    initialData = {
         customer: '',
         startDate: '',
         days: '',
         location: '',
         comments: ''
+    },
+    onSubmit,
+    submitButtonText = 'Create Job',
+    isLoading = false,
+    onCancel = null
+}) => {
+    const [formData, setFormData] = useState({
+        customer: initialData.customer || '',
+        startDate: initialData.startDate || '',
+        days: initialData.days || '',
+        location: initialData.location || '',
+        comments: initialData.comments || ''
     });
     const [error, setError] = useState('');
 
@@ -30,17 +42,19 @@ const JobForm = ({ onSubmit }) => {
 
         try {
             await onSubmit(formData);
-            // Reset form after successful submission
-            setFormData({
-                customer: '',
-                startDate: '',
-                days: '',
-                location: '',
-                comments: ''
-            });
+            // Only reset form if there's no initialData (creating vs editing)
+            if (!initialData.customer) {
+                setFormData({
+                    customer: '',
+                    startDate: '',
+                    days: '',
+                    location: '',
+                    comments: ''
+                });
+            }
             setError('');
         } catch (err) {
-            setError('Error creating job: ' + (err.message || 'Unknown error'));
+            setError('Error: ' + (err.message || err.toString() || 'Unknown error'));
         }
     };
 
@@ -109,12 +123,41 @@ const JobForm = ({ onSubmit }) => {
                     />
                 </div>
 
-                <button type="submit" className="submit-button">Create Job</button>
+                <div className="form-buttons">
+                    <button type="submit" className="submit-button" disabled={isLoading}>
+                        {isLoading ? 'Processing...' : submitButtonText}
+                    </button>
+
+                    {onCancel && (
+                        <button
+                            type="button"
+                            className="cancel-button"
+                            onClick={onCancel}
+                            disabled={isLoading}
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
             </form>
 
             <p className="form-note">* Required fields</p>
         </div>
     );
+};
+
+JobForm.propTypes = {
+    initialData: PropTypes.shape({
+        customer: PropTypes.string,
+        startDate: PropTypes.string,
+        days: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        location: PropTypes.string,
+        comments: PropTypes.string
+    }),
+    onSubmit: PropTypes.func.isRequired,
+    submitButtonText: PropTypes.string,
+    isLoading: PropTypes.bool,
+    onCancel: PropTypes.func
 };
 
 export default JobForm;
