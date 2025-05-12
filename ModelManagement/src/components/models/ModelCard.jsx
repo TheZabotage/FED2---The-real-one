@@ -32,7 +32,7 @@ const ModelCard = ({ model, onEdit, onDelete }) => {
                 <div className="model-actions">
                     <button
                         onClick={() => onEdit(model)}
-                        className="btn btn-outline edit-btn"
+                        className="btn edit-btn"
                         title="Edit this model"
                     >
                         Edit
@@ -43,7 +43,7 @@ const ModelCard = ({ model, onEdit, onDelete }) => {
                                 onDelete(model.modelId);
                             }
                         }}
-                        className="btn btn-outline delete-btn"
+                        className="btn delete-btn"
                         title="Delete this model"
                     >
                         Delete

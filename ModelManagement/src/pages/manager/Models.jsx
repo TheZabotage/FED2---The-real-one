@@ -115,7 +115,8 @@ const Models = () => {
         setFormMode('edit');
         setShowForm(true);
         // Scroll to form
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const scrollPosY = document.querySelector('.slide-up').offsetTop;
+        window.scrollTo({ top: scrollPosY, behavior: 'smooth' });
     };
 
     // Cancel editing
@@ -201,7 +202,7 @@ const Models = () => {
                     </div>
                 )}
                 <div className="page-header">
-                    <h1>Models</h1>
+                    <h1>Add a new model or edit an existing model</h1>
                     <div className="actions">
                         <button
                             className="btn btn-primary"

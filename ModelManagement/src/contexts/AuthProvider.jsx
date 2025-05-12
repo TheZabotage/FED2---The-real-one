@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
                 const email = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
                 const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
                 const modelId = decoded["ModelId"];
+
                 console.log("Decoded token:", decoded);
                 console.log("Role from token:", role);
                 console.log("isManager check:", role === "Manager");
@@ -54,7 +55,9 @@ export const AuthProvider = ({ children }) => {
             const userEmail = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
             const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
             const modelId = decoded["ModelId"];
+            const loginname = decoded["firstName"];
 
+            console.log("Name: ,", loginname);
             console.log("Email from token:", userEmail);
             console.log("Role from token:", role);
             console.log("isManager check:", role === "Manager");
@@ -62,7 +65,8 @@ export const AuthProvider = ({ children }) => {
             setCurrentUser({
                 email: userEmail,
                 isManager: role === "Manager", // Using the same check as in useEffect
-                modelId: modelId !== "-1" ? modelId : null
+                modelId: modelId !== "-1" ? modelId : null,
+                firstName: loginname
             });
 
             return true;

@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 
@@ -9,7 +9,18 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, currentUser } = useAuth();
+
+    // Navigate to appropriate dashboard after currentUser is set
+    useEffect(() => {
+        if (currentUser) {
+            if (currentUser.isManager) {
+                navigate('/dashboard');
+            } else {
+                navigate('/my-jobs');
+            }
+        }
+    }, [currentUser, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,14 +28,10 @@ const Login = () => {
             setError('');
             setLoading(true);
             const success = await login(email, password);
-            if (success) {
-                // Delay because wrong credentials at first
-                setTimeout(() => {
-                    navigate('/dashboard');
-                }, 100);
-            } else {
+            if (!success) {
                 setError('Failed to log in');
             }
+            // Remove the navigate call here - it will happen in useEffect
         } catch (err) {
             setError('Failed to log in: ' + (err.message || 'Unknown error'));
         } finally {

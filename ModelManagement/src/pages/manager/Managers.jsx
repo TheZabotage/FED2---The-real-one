@@ -64,6 +64,29 @@ const Managers = () => {
         <div className="managers-page">
             <h1>Managers</h1>
 
+            {/* Managers List */}
+            <div className="managers-list">
+                <h2>Managers List</h2>
+                {loading ? (
+                    <p>Loading...</p>
+                ) : error ? (
+                    <p className="error">{error}</p>
+                ) : (
+                    <div className="managers-grid">
+                        {managers.length === 0 ? (
+                            <p>No managers available.</p>
+                        ) : (
+                            managers.map((manager) => (
+                                <div key={manager.id} className="manager-card">
+                                    <h3>{manager.firstName} {manager.lastName}</h3>
+                                    <p>Email: {manager.email}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+            </div>
+
             {/* Create Manager Form */}
             <div className="create-manager-form">
                 <h2>Create New Manager</h2>
@@ -117,32 +140,13 @@ const Managers = () => {
                         />
                     </div>
 
-                    <button type="submit">Create Manager</button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => handleSubmit()}
+                    >
+                        Save new manager
+                    </button>
                 </form>
-            </div>
-
-            {/* Managers List */}
-            <div className="managers-list">
-                <h2>Managers List</h2>
-                {loading ? (
-                    <p>Loading...</p>
-                ) : error ? (
-                    <p className="error">{error}</p>
-                ) : (
-                    <div className="managers-grid">
-                        {managers.length === 0 ? (
-                            <p>No managers available.</p>
-                        ) : (
-                            managers.map((manager) => (
-                                <div key={manager.id} className="manager-card">
-                                    <h3>{manager.firstName} {manager.lastName}</h3>
-                                    <p>Email: {manager.email}</p>
-                                    {/* Add more details or actions as needed */}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                )}
             </div>
         </div>
     );

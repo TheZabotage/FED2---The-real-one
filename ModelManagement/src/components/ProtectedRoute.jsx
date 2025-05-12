@@ -9,9 +9,16 @@ export const ProtectedRoute = ({ children, requiredRole }) => {
         return <Navigate to="/login" />;
     }
 
-    if (requiredRole === 'manager' && !currentUser.isManager) {
+    if (requiredRole === 'Manager' && !currentUser.isManager) {
+        console.log("Unauthorized access attempt by non-manager user.");
         return <Navigate to="/unauthorized" />;
     }
+
+    if (requiredRole === 'Manager' && !currentUser.isManager) {
+        console.log("Unauthorized access attempt by non-manager user.");
+        return <Navigate to="/my-jobs" />;
+    }
+
 
     return children;
 };

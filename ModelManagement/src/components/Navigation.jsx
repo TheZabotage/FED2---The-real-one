@@ -17,40 +17,47 @@ const Navigation = () => {
     const isActive = (path) => {
         return location.pathname === path;
     };
+    // Handle logo click based on user role
+    const handleLogoClick = (e) => {
+        if (!currentUser) return;
+
+        if (currentUser.isManager) {
+            // Manager goes to dashboard
+            navigate('/dashboard');
+        } else {
+            // Model behavior - do nothing
+            navigate('/my-jobs');
+
+        }
+    };
+
 
     return (
         <nav className="navbar">
             <div className="navbar-container">
                 <div className="logo">
-                    <Link to="/">
-                        <span className="logo-icon">💼</span>
+                    <Link to={currentUser?.isManager ? "/" : "#"} onClick={handleLogoClick}>
+                        <span className="logo-icon"></span>
                         Model Management
+                        
                     </Link>
                 </div>
 
-                {/* Mobile menu toggle */}
-                <button
-                    className="mobile-menu-toggle"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Toggle menu"
-                >
-                    <span className="hamburger-icon"></span>
-                </button>
-
-                {/* Navigation links - desktop and mobile */}
+                {/* Navigation links - desktop */}
                 <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
                     {currentUser ? (
                         <>
-                            <Link
-                                to="/dashboard"
-                                className={isActive('/dashboard') ? 'active' : ''}
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Dashboard
-                            </Link>
 
                             {currentUser.isManager && (
                                 <>
+
+                                    <Link
+                                        to="/dashboard"
+                                        className={isActive('/dashboard') ? 'active' : ''}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Dashboard
+                                    </Link>
                                     <Link
                                         to="/models"
                                         className={isActive('/models') ? 'active' : ''}

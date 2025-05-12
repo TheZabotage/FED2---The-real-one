@@ -114,14 +114,14 @@ const ExpenseForm = ({
                 />
 
                 <div className="form-buttons">
-                    <button type="submit" className="submit-button" disabled={isLoading}>
+                    <button type="submit" className="btn btn-primary" disabled={isLoading}>
                         {isLoading ? 'Saving...' : 'Add Expense'}
                     </button>
 
                     {onCancel && (
                         <button
                             type="button"
-                            className="cancel-button"
+                            className="btn cancel-button"
                             onClick={onCancel}
                             disabled={isLoading}
                         >

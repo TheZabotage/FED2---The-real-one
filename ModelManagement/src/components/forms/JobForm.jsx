@@ -124,14 +124,14 @@ const JobForm = ({
                 </div>
 
                 <div className="form-buttons">
-                    <button type="submit" className="submit-button" disabled={isLoading}>
+                    <button type="submit" className="btn submit-button" disabled={isLoading}>
                         {isLoading ? 'Processing...' : submitButtonText}
                     </button>
 
                     {onCancel && (
                         <button
                             type="button"
-                            className="cancel-button"
+                            className="btn cancel-button"
                             onClick={onCancel}
                             disabled={isLoading}
                         >

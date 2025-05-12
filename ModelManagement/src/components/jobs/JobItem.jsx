@@ -20,14 +20,14 @@ const JobItem = ({
                 <div className="job-actions">
                     <button
                         onClick={() => onEditJob(job)}
-                        className="edit-btn"
+                        className="btn edit-btn"
                         title="Edit this job"
                     >
                         Edit
                     </button>
                     <button
                         onClick={() => onDeleteJob(job.jobId)}
-                        className="delete-btn"
+                        className="btn delete-btn"
                         title="Delete this job"
                     >
                         Delete
@@ -51,7 +51,7 @@ const JobItem = ({
                                 {model.firstName} {model.lastName}
                                 <button
                                     onClick={() => onRemoveModel(job.jobId, model.modelId)}
-                                    className="remove-model-btn"
+                                    className="btn remove-model-btn"
                                 >
                                     Remove
                                 </button>
@@ -66,7 +66,7 @@ const JobItem = ({
             <div className="add-model-section">
                 <button
                     onClick={() => onSelectForAddModel(job)}
-                    className="select-job-btn"
+                    className="btn add-model-btn"
                 >
                     Add Models to this Job
                 </button>

@@ -25,7 +25,7 @@ const JobCard = ({
                         {onEditJob && (
                             <button
                                 onClick={() => onEditJob(job)}
-                                className="edit-btn"
+                                className="btn btn-outline  edit-btn"
                                 title="Edit this job"
                             >
                                 Edit
@@ -35,7 +35,7 @@ const JobCard = ({
                         {onDeleteJob && (
                             <button
                                 onClick={() => onDeleteJob(job.jobId)}
-                                className="delete-btn"
+                                className="btn btn-outline -btn"
                                 title="Delete this job"
                             >
                                 Delete
@@ -65,7 +65,7 @@ const JobCard = ({
                     {onAddExpense && (
                         <button
                             onClick={() => onAddExpense(job.jobId)}
-                            className="add-expense-button"
+                            className="btn add-model-btn"
                         >
                             Add Expense
                         </button>
