@@ -90,16 +90,6 @@ export const managerService = {
     deleteExpense: (id) => api.delete(`/Expenses/${id}`)
 };
 
-// Model service
-export const modelService = {
-    // For models to access their own jobs and expenses
-    //Added debugging because it doesn't work fucking work. PSS: Remember to check swagge once in a  while :DDD
-    getMyJobs: () => {
-        return api.get('/Jobs');
-    },
-    addExpense: (expenseData) => api.post('/Expenses', expenseData),
-    getMyExpenses: (modelId) => api.get(`/Expenses/model/${modelId}`)
 
-};
 
 export default api;
